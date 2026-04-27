@@ -176,9 +176,15 @@ public class KHS_BumperBalloonCarsGameManager : MonoBehaviourPunCallbacks, IPunO
 
         Debug.Log($"현재 로딩된 플레이어 : {_playersLoaded}");
 
-        if (_playersLoaded == PhotonNetwork.CurrentRoom.PlayerCount)    // TODO : 네트워크로 합칠때 인원 수에 관한 조정이 필요한 상태
-        {
-            photonView.RPC("KHS_BumperCartGameStart", RpcTarget.AllViaServer, PhotonNetwork.Time);  // 모두에게 게임을 시작한다는 RPC함수를 호출하겠다고 신호를 보냄
+    // 모든 플레이어가 로드되었는지 체크
+    if (_playersLoaded == PhotonNetwork.CurrentRoom.PlayerCount)
+    {
+             // [Authority] 중복 실행 방지 및 신뢰성 확보를 위해 방장(Master)만 신호 송신
+            if (PhotonNetwork.IsMasterClient)
+            {
+                // PhotonNetwork.Time(서버 절대 시간)을 실어 모든 유저에게 동기화 신호 전송
+                photonView.RPC("KHS_BumperCartGameStart", RpcTarget.AllViaServer, PhotonNetwork.Time);
+            }
         }
     }
 
